@@ -402,6 +402,17 @@ module StateMachine
         object.class.state_machines.transitions(object, action, :after => false).perform { yield }
       end
 
+      def define_state_initializer
+        define_helper :instance, <<-end_eval, __FILE__, __LINE__ + 1
+          def initialize(*)
+            super do |*args|
+              self.class.state_machines.initialize_states self
+              yield(*args) if block_given?
+            end
+          end
+        end_eval
+      end
+
       protected
         # Whether observers are supported in the integration.  Only true if
         # ActiveModel::Observer is available.
